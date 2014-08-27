@@ -41,10 +41,8 @@ namespace LyncUtilityBelt
 				var fmt = string.Format("{0} {1}", e.RemoteParticipant, ratecenter);
 				_icon.ShowBalloonTip(10000, "Incoming call", fmt, System.Windows.Forms.ToolTipIcon.Info);
 			}
-			else
-			{
-				_icon.ShowBalloonTip(20000, "UNKNOWN", e.RemoteParticipant, System.Windows.Forms.ToolTipIcon.Warning);
-			}
+			//else
+			//	_icon.ShowBalloonTip(20000, "UNKNOWN", e.RemoteParticipant, System.Windows.Forms.ToolTipIcon.Warning);
 		}
 	}
 }
