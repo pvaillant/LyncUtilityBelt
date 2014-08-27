@@ -85,6 +85,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="LyncHue.cs" />
+    <Compile Include="OutlookWorkHours.cs" />
     <Compile Include="WhoIsCallingMe.cs" />
   </ItemGroup>
   <ItemGroup>

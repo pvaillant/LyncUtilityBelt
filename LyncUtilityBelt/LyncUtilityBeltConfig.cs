@@ -46,6 +46,16 @@ namespace LyncUtilityBelt
 		[XmlIgnore]
 		public bool Dirty { get; private set; }
 
+		#region Outlook Work Hours config
+		private bool _outlookWorkHoursEnabled;
+		[XmlElement]
+		public bool OutlookWorkHoursEnabled
+		{
+			get { return _outlookWorkHoursEnabled; }
+			set { _outlookWorkHoursEnabled = value; Dirty = true; }
+		}
+		#endregion
+
 		#region Who Is Calling Me config
 		private bool _whoIsCallingMeEnabled;
 		[XmlElement]

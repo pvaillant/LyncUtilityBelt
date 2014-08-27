@@ -28,6 +28,41 @@ namespace LyncUtilityBelt
 	 */
 	public class AvailabilityMonitor
 	{
+		public static bool TryGetSelfAvailability(out ContactAvailability availability, out string activityId)
+		{
+			try
+			{
+				var info = LyncClient.GetClient().Self.Contact.GetContactInformation(new ContactInformationType[] {
+					ContactInformationType.ActivityId,
+					ContactInformationType.Availability
+				});
+				availability = (ContactAvailability)(int)info[ContactInformationType.Availability];
+				activityId = (string)info[ContactInformationType.ActivityId];
+				return true;
+			}
+			catch
+			{
+				availability = ContactAvailability.None;
+				activityId = null;
+				return false;
+			}
+		}
+
+		public static void SetSelfAvailability(ContactAvailability availability, string activityId = null)
+		{
+			if(string.IsNullOrEmpty(activityId))
+				activityId = availability.ToString().ToLower();
+			try
+			{
+				var info = new Dictionary<PublishableContactInformationType, object> {
+					{PublishableContactInformationType.Availability, availability},
+					{PublishableContactInformationType.ActivityId, activityId}
+				};
+				LyncClient.GetClient().Self.BeginPublishContactInformation(info, null, null);
+			}
+			catch { }
+		}
+
 		internal event Action<ContactAvailability, string> AvailabilityChanged = delegate { };
 
 		private LyncClient _lyncClient;
@@ -66,5 +101,4 @@ namespace LyncUtilityBelt
 			AvailabilityChanged(availability, activityId);
 		}
 	}
-
 }

@@ -17,6 +17,7 @@ namespace LyncUtilityBelt
 	/// </summary>
 	public partial class App : Application
 	{
+		private OutlookWorkHours _outlookWorkHours;
 		private WhoIsCallingMe _whoIsCallingMe;
 		private LyncHue _lyncHue;
 
@@ -53,6 +54,7 @@ namespace LyncUtilityBelt
 			_icon.Visible = true;
 			_icon.Text = "Lync Utility Belt";
 			_icon.ContextMenu = new System.Windows.Forms.ContextMenu(new System.Windows.Forms.MenuItem[] {
+				new System.Windows.Forms.MenuItem("Outlook Work Hours", owh_Toggle),
 				new System.Windows.Forms.MenuItem("Who Is Calling Me?", wicm_Toggle),
 				new System.Windows.Forms.MenuItem("Philips Hue Lync", new System.Windows.Forms.MenuItem[] {
 					new System.Windows.Forms.MenuItem("Bridges", new System.Windows.Forms.MenuItem[] {}),
@@ -64,17 +66,26 @@ namespace LyncUtilityBelt
 
 			_config = LyncUtilityBeltConfig.Load();
 
+			_outlookWorkHours = new OutlookWorkHours(_icon);
+			if (_config.OutlookWorkHoursEnabled)
+			{
+				_icon.ContextMenu.MenuItems[0].Checked = true;
+				_outlookWorkHours.Start();
+			}
+
 			_whoIsCallingMe = new WhoIsCallingMe(_icon);
 			if (_config.WhoIsCallingMeEnabled)
-				wicm_Toggle(null, null);
+			{
+				_icon.ContextMenu.MenuItems[1].Checked = true;
+				_whoIsCallingMe.Start();
+			}
 
-			_lyncHue = new LyncHue(_icon, _icon.ContextMenu.MenuItems[1].MenuItems[0], _icon.ContextMenu.MenuItems[1].MenuItems[1], _config);
+			_lyncHue = new LyncHue(_icon, _icon.ContextMenu.MenuItems[2].MenuItems[0], _icon.ContextMenu.MenuItems[2].MenuItems[1], _config);
 			_lyncHue.Start(); // always started unless we find a way to make the submenu 'unclickable'
 
 			base.OnStartup(e);
 		}
 
-		private void wicm_Toggle(object sender, EventArgs e)
 		void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
 		{
 			var ex = (Exception)e.ExceptionObject;
@@ -92,8 +103,21 @@ namespace LyncUtilityBelt
 			return msg;
 		}
 
+		private void owh_Toggle(object sender, EventArgs e)
 		{
 			var mi = _icon.ContextMenu.MenuItems[0];
+			mi.Checked = !mi.Checked;
+			if (mi.Checked)
+				_outlookWorkHours.Start();
+			else
+				_outlookWorkHours.Stop();
+			_config.OutlookWorkHoursEnabled = mi.Checked;
+			_config.Save();
+		}
+
+		private void wicm_Toggle(object sender, EventArgs e)
+		{
+			var mi = _icon.ContextMenu.MenuItems[1];
 			mi.Checked = !mi.Checked;
 			if (mi.Checked)
 				_whoIsCallingMe.Start();
