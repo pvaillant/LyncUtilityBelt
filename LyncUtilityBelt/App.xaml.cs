@@ -44,6 +44,8 @@ namespace LyncUtilityBelt
 
 		protected override void OnStartup(StartupEventArgs e)
 		{
+			AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+
 			base.OnStartup(e);
 
 			_icon = new NotifyIcon();
@@ -73,6 +75,23 @@ namespace LyncUtilityBelt
 		}
 
 		private void wicm_Toggle(object sender, EventArgs e)
+		void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+		{
+			var ex = (Exception)e.ExceptionObject;
+			var msg = DumpException(ex);
+			var file = string.Format("LyncUtilityBelt-{0:yyyyMMdd-HHmmss}.err.txt", DateTime.Now);
+			var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), file);
+			File.WriteAllText(path, msg);
+		}
+
+		string DumpException(Exception ex) 
+		{
+			var msg = ex.Message + Environment.NewLine + ex.StackTrace;
+			if (ex.InnerException != null)
+				msg = msg + Environment.NewLine + "----" + DumpException(ex.InnerException);
+			return msg;
+		}
+
 		{
 			var mi = _icon.ContextMenu.MenuItems[0];
 			mi.Checked = !mi.Checked;
