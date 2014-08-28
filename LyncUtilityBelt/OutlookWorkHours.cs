@@ -6,7 +6,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Windows.Threading;
 
 namespace LyncUtilityBelt
 {
@@ -32,27 +31,26 @@ namespace LyncUtilityBelt
 		private TimeSpan _calDefStart;
 		private TimeSpan _calDefEnd;
 
-		private DispatcherTimer _dispatcher;
+		private System.Threading.Timer _dispatcher;
 
 		public OutlookWorkHours(NotifyIcon icon)
 		{
 			_icon = icon;
 
 			ReadWorkHours();
-
-			_dispatcher = new DispatcherTimer { Interval = new TimeSpan(0,1,0) };
-			_dispatcher.Tick += dispatcher_Tick;
 		}
 
 		public void Start() {
-			_dispatcher.Start();
+			_dispatcher = new System.Threading.Timer(dispatcher_Tick, null, 0, 60 * 1000);
+
 		}
 
 		public void Stop() {
-			_dispatcher.Stop();
+			_dispatcher.Dispose();
+			_dispatcher = null;
 		}
 
-		private void dispatcher_Tick(object sender, EventArgs e)
+		private void dispatcher_Tick(object state) //sender, EventArgs e)
 		{
  			ReadWorkHours();
 			ContactAvailability availability;
