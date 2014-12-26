@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Configuration;
@@ -24,6 +25,9 @@ namespace LyncUtilityBelt
 		private NotifyIcon _icon;
 		private LyncUtilityBeltConfig _config;
 
+		private RegistryKey _runKey;
+		private const string RUN_KEY_VALUE = "LyncUtilityBelt";
+
 		private const string ICO_NAME = "logo.ico";
 		private static Icon SysTrayIcon
 		{
@@ -47,6 +51,8 @@ namespace LyncUtilityBelt
 		{
 			AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
 
+			_runKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
+
 			base.OnStartup(e);
 
 			_icon = new NotifyIcon();
@@ -61,8 +67,11 @@ namespace LyncUtilityBelt
 					new System.Windows.Forms.MenuItem("Lights", new System.Windows.Forms.MenuItem[] {})
 				}),
 				new System.Windows.Forms.MenuItem("--"),
+				new System.Windows.Forms.MenuItem("Run at Startup", rasu_Toggle),
 				new System.Windows.Forms.MenuItem("Exit", icon_Exit)
 			});
+
+			_icon.ContextMenu.MenuItems[4].Checked = (_runKey.GetValue(RUN_KEY_VALUE) != null);
 
 			_config = LyncUtilityBeltConfig.Load();
 
@@ -125,6 +134,15 @@ namespace LyncUtilityBelt
 				_whoIsCallingMe.Stop();
 			_config.WhoIsCallingMeEnabled = mi.Checked;
 			_config.Save();
+		}
+
+		private void rasu_Toggle(object sender, EventArgs e)
+		{
+			var mi = _icon.ContextMenu.MenuItems[4];
+			mi.Checked = !mi.Checked;
+			_runKey.DeleteValue(RUN_KEY_VALUE, false);
+			if (mi.Checked)
+				_runKey.SetValue(RUN_KEY_VALUE, System.Reflection.Assembly.GetExecutingAssembly().Location);
 		}
 
 		private void icon_Exit(object sender, EventArgs e)
